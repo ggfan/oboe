@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Android Open Source Project
+ * Copyright 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,9 +64,9 @@ class EchoAudioEngine : public oboe::AudioStreamCallback {
   oboe::AudioStream *playStream_ = nullptr;
   int32_t framesPerBurst_;
   std::mutex restartingLock_;
-  std::unique_ptr<AudioMixer> mixerEffect_ = nullptr;
-  std::unique_ptr<AudioDelay> delayEffect_ = nullptr;
-  uint64_t audioBlockingReadTimeout_ = NANOS_PER_MILLISECOND;
+  std::unique_ptr<AudioMixer> mixerEffect_;
+  std::unique_ptr<AudioDelay> delayEffect_;
+  int64_t audioBlockingReadTimeout_ = oboe::kNanosPerMillisecond;
   oboe::AudioApi audioApi_ = oboe::AudioApi::AAudio;
   float echoDelay_ = 0.5f;
   float echoDecay_ = 0.1f;

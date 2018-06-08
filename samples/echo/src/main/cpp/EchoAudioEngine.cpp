@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The Android Open Source Project
+ * Copyright 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ void EchoAudioEngine::openPlaybackStream() {
 
     // Read blocking timeout value: half of the burst size
     audioBlockingReadTimeout_ = static_cast<uint64_t>(.5f * framesPerBurst_
-                                          / sampleRate_ * NANOS_PER_SECOND);
+                                          / sampleRate_ * oboe::kNanosPerSecond);
 
     latencyTuner_ = std::unique_ptr<oboe::LatencyTuner>
                     (new oboe::LatencyTuner(*playStream_));
@@ -318,7 +318,7 @@ oboe::DataCallbackResult EchoAudioEngine::onAudioReady(
 
   assert(oboeStream == playStream_);
 
-  if (frameCallbackCount_) {
+  if (frameCallbackCount_ < 10) {
     latencyTuner_->tune();
   }
   frameCallbackCount_++;
