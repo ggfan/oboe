@@ -53,7 +53,6 @@ class EchoAudioEngine : public oboe::AudioStreamCallback {
 
  private:
   bool isEchoOn_ = false;
-  uint64_t frameCallbackCount_ = 0;
   int32_t recordingDeviceId_ = oboe::kUnspecified;
   int32_t playbackDeviceId_ = oboe::kUnspecified;
   oboe::AudioFormat format_ = oboe::AudioFormat::I16;
@@ -66,13 +65,13 @@ class EchoAudioEngine : public oboe::AudioStreamCallback {
   std::mutex restartingLock_;
   std::unique_ptr<AudioMixer> mixerEffect_;
   std::unique_ptr<AudioDelay> delayEffect_;
-  int64_t audioBlockingReadTimeout_ = oboe::kNanosPerMillisecond;
   oboe::AudioApi audioApi_ = oboe::AudioApi::AAudio;
   float echoDelay_ = 0.5f;
   float echoDecay_ = 0.1f;
+  uint64_t playFrameCount_ = static_cast<uint64_t> (0);
+  uint64_t recordFrameCount_ = static_cast<uint64_t>(0);
 
   bool mixAudio_ = false;
-  std::unique_ptr<oboe::LatencyTuner> latencyTuner_;
 
   void openRecordingStream();
   void openPlaybackStream();

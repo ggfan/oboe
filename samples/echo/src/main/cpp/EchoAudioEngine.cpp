@@ -30,7 +30,6 @@ EchoAudioEngine::~EchoAudioEngine() {
   stopStream(recordingStream_);
 
   closeStream(playStream_);
-  frameCallbackCount_ = 0;
 
   closeStream(recordingStream_);
 }
@@ -79,6 +78,8 @@ void EchoAudioEngine::openAllStreams() {
     mixAudio_ = mixerEffect_->AudioFormatSupported(playStream_->getSampleRate(),
       playStream_->getChannelCount(), playStream_->getFormat());
 
+    playFrameCount_ = 0;
+    recordFrameCount_ = 0;
     startStream(recordingStream_);
     startStream(playStream_);
   } else {
@@ -160,18 +161,10 @@ void EchoAudioEngine::openPlaybackStream() {
 
     framesPerBurst_ = playStream_->getFramesPerBurst();
 
-    // Read blocking timeout value: half of the burst size
-    audioBlockingReadTimeout_ = static_cast<uint64_t>(.5f * framesPerBurst_
-                                          / sampleRate_ * oboe::kNanosPerSecond);
-
-    latencyTuner_ = std::unique_ptr<oboe::LatencyTuner>
-                    (new oboe::LatencyTuner(*playStream_));
-
     delayEffect_ = std::unique_ptr<AudioDelay>(new AudioDelay(
       sampleRate_,outputChannelCount_, format_, echoDelay_, echoDecay_));
     assert(delayEffect_ && mixerEffect_);
 
-    frameCallbackCount_ = 0;
     warnIfNotLowLatency(playStream_);
 
     PrintAudioStreamInfo(playStream_);
@@ -318,23 +311,15 @@ oboe::DataCallbackResult EchoAudioEngine::onAudioReady(
 
   assert(oboeStream == playStream_);
 
-  if (frameCallbackCount_ < 10) {
-    latencyTuner_->tune();
-  }
-  frameCallbackCount_++;
+  // non-blocking read from recording stream
+  int32_t framesRead = 0;
+  do {
+      oboe::ErrorOrValue<int32_t> status =
+        recordingStream_->read(audioData, numFrames, 0);
+      framesRead = (!status) ? 0 : status.value();
+      recordFrameCount_ += framesRead;
+  } while (framesRead && recordFrameCount_ <= playFrameCount_);
 
-  // blocking read with timeout:
-  //     recorder may not have data ready, specifically
-  //     at the very beginning; in this case, simply play
-  //     silent audio. The timeout is equivalent to
-  //       framesPerBurst()/2
-  //     Do not make it too long, otherwise player would underrun
-  //     and if tuning is in process, player will increase
-  //     FramesPerBurst.
-  oboe::ErrorOrValue<int32_t> status =
-    recordingStream_->read(audioData, numFrames, audioBlockingReadTimeout_);
-
-  int32_t framesRead = (!status) ? 0 : status.value();
   if (framesRead < numFrames) {
     int32_t bytesPerFrame = recordingStream_->getChannelCount() *
                             SampleFormatToBpp(oboeStream->getFormat()) / 8;
@@ -349,6 +334,9 @@ oboe::DataCallbackResult EchoAudioEngine::onAudioReady(
     mixerEffect_->process(static_cast<int16_t *>(audioData),
                          outputChannelCount_, numFrames);
   }
+
+  playFrameCount_ += numFrames;
+
   return oboe::DataCallbackResult::Continue;
 }
 
