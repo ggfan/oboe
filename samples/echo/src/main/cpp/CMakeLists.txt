@@ -28,11 +28,9 @@ add_library(echo
         EchoAudioEngine.cpp
         jni_bridge.cpp
         AudioEffect.cpp
-        ${SAMPLE_ROOT_DIR}/debug-utils/trace.cpp
-        ${SAMPLE_ROOT_DIR}/common/audio_common.cpp)
+        ${SAMPLE_ROOT_DIR}/debug-utils/trace.cpp)
 target_include_directories(echo
     PRIVATE
-        ${SAMPLE_ROOT_DIR}/common
         ${SAMPLE_ROOT_DIR}/debug-utils
         ${OBOE_DIR}/include)
 target_link_libraries(echo

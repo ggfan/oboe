@@ -17,12 +17,13 @@
 #ifndef OBOE_ECHOAUDIOENGINE_H
 #define OBOE_ECHOAUDIOENGINE_H
 
-#include <thread>
-#include <jni.h>
-#include <string>
-#include "audio_common.h"
 #include "AudioEffect.h"
+#include <jni.h>
+#include <thread>
+#include <string>
 
+constexpr int kMonoChannelCount = 1;
+constexpr int kStereoChannelCount = 2;
 const int32_t kLoopbackSampleRate = 48000;
 
 class EchoAudioEngine : public oboe::AudioStreamCallback {

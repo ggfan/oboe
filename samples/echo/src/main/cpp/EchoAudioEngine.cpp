@@ -15,7 +15,6 @@
  */
 
 #include "EchoAudioEngine.h"
-#include <audio_common.h>
 #include <logging_macros.h>
 #include <climits>
 #include <assert.h>
@@ -141,9 +140,9 @@ void EchoAudioEngine::openRecordingStream() {
     assert(recordingStream_->getFormat() == oboe::AudioFormat::I16);
 
     warnIfNotLowLatency(recordingStream_);
-    PrintAudioStreamInfo(recordingStream_);
+    LOGI("Recording Stream: \n%s", oboe::convertToText(recordingStream_));
   } else {
-    LOGE("Failed to create recording stream. Error: %s", convertToText(result));
+    LOGE("Failed to create recording stream. Error: %s", oboe::convertToText(result));
   }
 }
 
@@ -177,7 +176,7 @@ void EchoAudioEngine::openPlaybackStream() {
 
     warnIfNotLowLatency(playStream_);
 
-    PrintAudioStreamInfo(playStream_);
+    LOGI("Play Stream Info: \n%s", oboe::convertToText(playStream_));
   } else {
     LOGE("Failed to create playback stream. Error: %s",
          oboe::convertToText(result));
@@ -214,8 +213,7 @@ oboe::AudioStreamBuilder *EchoAudioEngine::setupPlaybackStreamParameters(
       ->setDeviceId(playbackDeviceId_)
       ->setDirection(oboe::Direction::Output)
       ->setChannelCount(outputChannelCount_)
-      ->setSampleRate(sampleRate_)
-      ->setFramesPerCallback(framesPerBurst_);
+      ->setSampleRate(sampleRate_);
 
   return setupCommonStreamParameters(builder);
 }
@@ -243,7 +241,7 @@ void EchoAudioEngine::startStream(oboe::AudioStream *stream) {
   if (stream) {
     oboe::Result result = stream->requestStart();
     if (result != oboe::Result::OK) {
-      LOGE("Error starting stream. %s", convertToText(result));
+      LOGE("Error starting stream. %s", oboe::convertToText(result));
     }
   }
 }
@@ -268,7 +266,7 @@ void EchoAudioEngine::closeStream(oboe::AudioStream *stream) {
   if (stream) {
     oboe::Result result = stream->close();
     if (result != oboe::Result::OK) {
-      LOGE("Error closing stream. %s", convertToText(result));
+      LOGE("Error closing stream. %s", oboe::convertToText(result));
     }
   }
 }
@@ -347,7 +345,7 @@ oboe::DataCallbackResult EchoAudioEngine::onAudioReady(
 
   if (framesRead < numFrames) {
     int32_t bytesPerFrame = recordingStream_->getChannelCount() *
-                            SampleFormatToBpp(oboeStream->getFormat()) / 8;
+                            oboeStream->getBytesPerSample();
     uint8_t *padPos = static_cast<uint8_t*>(audioData) +
                       framesRead * bytesPerFrame;
     memset(padPos, 0, (size_t)(numFrames - framesRead) * bytesPerFrame);

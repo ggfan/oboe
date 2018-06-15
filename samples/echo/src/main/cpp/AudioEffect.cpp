@@ -17,7 +17,6 @@
 #include <logging_macros.h>
 #include <climits>
 #include <cstring>
-#include <audio_common.h>
 
 #define CLAMP_FOR_I16(x) ((x)>SHRT_MAX ? SHRT_MAX : \
                          ((x)<SHRT_MIN ? SHRT_MIN : (x)))
@@ -218,7 +217,7 @@ void AudioDelay::allocateBuffer(void) {
 
   size_t sampleCount = static_cast<uint32_t>(fNumFrames + 0.5f) * channelCount_;
 
-  uint32_t bytePerSample = SampleFormatToBpp(format_) / 8;
+  uint32_t bytePerSample = oboe::convertFormatToSizeInBytes(format_);
   assert(bytePerSample <= 4);
 
   uint32_t bytePerFrame =  channelCount_ * bytePerSample;

@@ -120,9 +120,12 @@
         android:layout_marginTop="5dp"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"
+        android:maxHeight="3dp"
+        android:minHeight="3dp"
         android:max="10"
         android:min="0"
         android:progress="5"
+        android:progressDrawable="@drawable/balance_seekbar"
         app:layout_constraintStart_toEndOf="@+id/voiceLabel"
         app:layout_constraintEnd_toStartOf="@+id/musicLabel"
         app:layout_constraintTop_toTopOf="@+id/voiceLabel" />

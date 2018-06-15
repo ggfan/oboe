@@ -20,6 +20,10 @@
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>
+#include <oboe/AudioStream.h>
+#include <sstream>
+#include <string>
+#include <iostream>
 #endif
 
 #include "oboe/Definitions.h"
@@ -168,6 +172,31 @@ const char *convertToText<AudioApi >(AudioApi audioApi) {
     }
 }
 
+template<>
+const char* convertToText<AudioStream*>(AudioStream* stream) {
+    static std::string streamDesc;
+    std::stringstream s;
+    s.str("");
+
+    s<<"StreamID: "<< static_cast<void*>(stream)<<std::endl
+     <<"Direction: "<<oboe::convertToText(stream->getDirection())<<std::endl
+     <<"API type: "<<oboe::convertToText(stream->getAudioApi())<<std::endl
+     <<"BufferCapacity: "<<stream->getBufferCapacityInFrames()<<std::endl
+     <<"BufferSize: "<<stream->getBufferSizeInFrames()<<std::endl
+     <<"FramesPerBurst: "<< stream->getFramesPerBurst()<<std::endl
+     <<"XRunCount: "<<stream->getXRunCount().value()<<std::endl
+     <<"SampleRate: "<<stream->getSampleRate()<<std::endl
+     <<"SamplesPerFrame: "<<stream->getChannelCount()<<std::endl
+     <<"DeviceId: "<<stream->getDeviceId()<<std::endl
+     <<"Format: "<<oboe::convertToText(stream->getFormat())<<std::endl
+     <<"SharingMode: "<<oboe::convertToText(stream->getSharingMode())<<std::endl
+     <<"PerformanceMode: "<<oboe::convertToText(stream->getPerformanceMode())
+     <<std::endl
+     <<"FramesRead: "<<stream->getFramesRead()<<std::endl
+     <<"FramesWritten: "<<stream->getFramesWritten()<<std::endl;
+    streamDesc = s.str();
+    return streamDesc.c_str();
+}
 int getSdkVersion() {
 #ifdef __ANDROID__
     char sdk[PROP_VALUE_MAX] = {0};

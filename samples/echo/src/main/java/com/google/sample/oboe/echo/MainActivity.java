@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -78,32 +79,36 @@ public class MainActivity extends Activity
         toggleEchoButton.setText(getString(R.string.start_echo));
 
         recordingDeviceSpinner = findViewById(R.id.recording_devices_spinner);
-        recordingDeviceSpinner.setDirectionType(AudioManager.GET_DEVICES_INPUTS);
-        recordingDeviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                EchoEngine.setRecordingDeviceId(getRecordingDeviceId());
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            recordingDeviceSpinner.setDirectionType(AudioManager.GET_DEVICES_INPUTS);
+            recordingDeviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    EchoEngine.setRecordingDeviceId(getRecordingDeviceId());
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                // Do nothing
-            }
-        });
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                    // Do nothing
+                }
+            });
+        }
 
         playbackDeviceSpinner = findViewById(R.id.playback_devices_spinner);
-        playbackDeviceSpinner.setDirectionType(AudioManager.GET_DEVICES_OUTPUTS);
-        playbackDeviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                EchoEngine.setPlaybackDeviceId(getPlaybackDeviceId());
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            playbackDeviceSpinner.setDirectionType(AudioManager.GET_DEVICES_OUTPUTS);
+            playbackDeviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    EchoEngine.setPlaybackDeviceId(getPlaybackDeviceId());
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                // Do nothing
-            }
-        });
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                    // Do nothing
+                }
+            });
+        }
 
         ((RadioGroup)findViewById(R.id.apiSelectionGroup)).check(R.id.aaudioButton);
         findViewById(R.id.aaudioButton).setOnClickListener(new RadioButton.OnClickListener(){
